@@ -1,36 +1,38 @@
+version: '3.9'
+
 services:
   users-service:
     build:
       context: ./services/users_service
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./services/users_service:/app
-
-  orders-service:
-    build:
-      context: ./services/orders_service
-      dockerfile: Dockerfile
+    container_name: users-service
     ports:
       - "8001:8000"
     volumes:
-      - ./services/orders_service:/app
+      - ./services/users_service:/app
 
   products-service:
     build:
       context: ./services/products_service
-      dockerfile: Dockerfile
+    container_name: products-service
     ports:
       - "8002:8000"
     volumes:
       - ./services/products_service:/app
 
+  orders-service:
+    build:
+      context: ./services/orders_service
+    container_name: orders-service
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./services/orders_service:/app
+
   payments-service:
     build:
       context: ./services/payments_service
-      dockerfile: Dockerfile
+    container_name: payments-service
     ports:
-      - "8003:8000"
+      - "8004:8000"
     volumes:
       - ./services/payments_service:/app
