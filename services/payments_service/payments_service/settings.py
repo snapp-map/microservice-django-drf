@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'silk',
     'drf_spectacular',
     'django_filters',
+    'payments_service', 
 ]
 
 MIDDLEWARE = [
