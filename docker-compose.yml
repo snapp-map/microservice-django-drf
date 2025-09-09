@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  users-service:
+    build:
+      context: ./services/users_service   # 👈 کانتکست فقط فولدر سرویس
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PROJECT_DIR=/app
+    volumes:
+      - ./services/users_service:/app     # 👈 مپ شدن سورس کد داخل کانتینر

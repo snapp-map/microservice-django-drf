@@ -3,8 +3,8 @@ set -euo pipefail
 
 echo "ENTRYPOINT: Starting. CMD: $*"
 
-# Absolute path to the Django project root (where manage.py lives)
-PROJECT_DIR="/home/mdvr9980/Public/Backend/microservice-django-drf/services/products_service"
+# مسیر پروژه را از محیط بگیرید یا پیش‌فرض '/app' است
+PROJECT_DIR="${PROJECT_DIR:-/app}"
 
 # Change to the project directory if it exists
 if [ -d "$PROJECT_DIR" ]; then
@@ -21,6 +21,5 @@ else
   echo "manage.py not found in project dir. Skipping migrations."
 fi
 
-# Start the server using the CMD provided to the container
 echo "Starting server with: $@"
 exec "$@"

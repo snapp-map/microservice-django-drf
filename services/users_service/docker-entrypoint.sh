@@ -4,7 +4,7 @@ set -euo pipefail
 echo "ENTRYPOINT: Starting. CMD: $*"
 
 # Absolute path to the Django project root (where manage.py lives)
-PROJECT_DIR="/home/mdvr9980/Public/Backend/microservice-django-drf/services/users_service"
+PROJECT_DIR="/app"
 
 # Change to the project directory if it exists
 if [ -d "$PROJECT_DIR" ]; then
