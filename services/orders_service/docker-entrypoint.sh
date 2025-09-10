@@ -6,7 +6,6 @@ echo "ENTRYPOINT: Starting. CMD: $*"
 PROJECT_DIR="/app"
 cd "$PROJECT_DIR"
 
-# صبر کردن برای آماده شدن دیتابیس
 HOST="${DB_HOST:-db}"
 PORT="${DB_PORT:-5432}"
 echo "Waiting for database $HOST:$PORT ..."
@@ -16,5 +15,4 @@ until nc -z $HOST $PORT; do
 done
 echo "Database is up!"
 
-# اجرای سرور (بدون migrate اینجا!)
 exec "$@"

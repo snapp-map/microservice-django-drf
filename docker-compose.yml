@@ -1,77 +1,106 @@
 version: "3.9"
 
 services:
-  db:
+  # --- DATABASES ---
+  users-db:
     image: postgres:15
-    container_name: postgres_db
+    container_name: users_db
     restart: unless-stopped
     env_file:
-      - .env
+      - ./services/users_service/.env
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
+      - users_data:/var/lib/postgresql/data
 
+  products-db:
+    image: postgres:15
+    container_name: products_db
+    restart: unless-stopped
+    env_file:
+      - ./services/products_service/.env
+    ports:
+      - "5434:5432"
+    volumes:
+      - products_data:/var/lib/postgresql/data
+
+  orders-db:
+    image: postgres:15
+    container_name: orders_db
+    restart: unless-stopped
+    env_file:
+      - ./services/orders_service/.env
+    ports:
+      - "5435:5432"
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+
+  payments-db:
+    image: postgres:15
+    container_name: payments_db
+    restart: unless-stopped
+    env_file:
+      - ./services/payments_service/.env
+    ports:
+      - "5436:5432"
+    volumes:
+      - payments_data:/var/lib/postgresql/data
+
+  # --- SERVICES ---
   users-service:
     build: ./services/users_service
     container_name: users_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/users_service:/app
     ports:
       - "8001:8000"
     env_file:
-      - .env
+      - ./services/users_service/.env
     depends_on:
-      db:
-        condition: service_healthy
-    command: python manage.py runserver 0.0.0.0:8000
+      - users-db
 
   products-service:
     build: ./services/products_service
     container_name: products_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/products_service:/app
     ports:
       - "8002:8000"
     env_file:
-      - .env
+      - ./services/products_service/.env
     depends_on:
-      db:
-        condition: service_healthy
-    command: python manage.py runserver 0.0.0.0:8000
+      - products-db
 
   orders-service:
     build: ./services/orders_service
     container_name: orders_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/orders_service:/app
     ports:
       - "8003:8000"
     env_file:
-      - .env
+      - ./services/orders_service/.env
     depends_on:
-      db:
-        condition: service_healthy
-    command: python manage.py runserver 0.0.0.0:8000
+      - orders-db
 
   payments-service:
     build: ./services/payments_service
     container_name: payments_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/payments_service:/app
     ports:
       - "8004:8000"
     env_file:
-      - .env
+      - ./services/payments_service/.env
     depends_on:
-      db:
-        condition: service_healthy
-    command: python manage.py runserver 0.0.0.0:8000
+      - payments-db
 
 volumes:
-  postgres_data:
+  users_data:
+  products_data:
+  orders_data:
+  payments_data:
