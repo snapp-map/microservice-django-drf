@@ -4,16 +4,17 @@ set -euo pipefail
 echo "ENTRYPOINT: Starting. CMD: $*"
 
 PROJECT_DIR="/app"
-
 cd "$PROJECT_DIR"
 
-if [ -f "manage.py" ]; then
-  echo "Running makemigrations..."
-  python manage.py makemigrations --noinput || true
+# صبر کردن برای آماده شدن دیتابیس
+HOST="${DB_HOST:-db}"
+PORT="${DB_PORT:-5432}"
+echo "Waiting for database $HOST:$PORT ..."
+until nc -z $HOST $PORT; do
+  echo "Database is unavailable - sleeping"
+  sleep 2
+done
+echo "Database is up!"
 
-  echo "Applying Django migrations..."
-  python manage.py migrate --noinput
-fi
-
-echo "Starting server with: $@"
+# اجرای سرور (بدون migrate اینجا!)
 exec "$@"

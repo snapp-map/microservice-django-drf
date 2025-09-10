@@ -1,38 +1,83 @@
-version: '3.9'
+version: "3.9"
 
 services:
-  users-service:
-    build:
-      context: ./services/users_service
-    container_name: users-service
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: unless-stopped
+    env_file:
+      - .env
     ports:
-      - "8001:8000"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: ./services/users_service
+    container_name: migrate_job
+    env_file:
+      - .env
+    depends_on:
+      - db
+    entrypoint: ["bash", "-lc", "python manage.py migrate --noinput"]
+    restart: "no"
+
+  users-service:
+    build: ./services/users_service
+    container_name: users_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/users_service:/app
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
 
   products-service:
-    build:
-      context: ./services/products_service
-    container_name: products-service
-    ports:
-      - "8002:8000"
+    build: ./services/products_service
+    container_name: products_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/products_service:/app
+    ports:
+      - "8002:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
 
   orders-service:
-    build:
-      context: ./services/orders_service
-    container_name: orders-service
-    ports:
-      - "8003:8000"
+    build: ./services/orders_service
+    container_name: orders_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/orders_service:/app
+    ports:
+      - "8003:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
 
   payments-service:
-    build:
-      context: ./services/payments_service
-    container_name: payments-service
-    ports:
-      - "8004:8000"
+    build: ./services/payments_service
+    container_name: payments_service
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/payments_service:/app
+    ports:
+      - "8004:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
