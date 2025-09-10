@@ -17,20 +17,9 @@ services:
       timeout: 3s
       retries: 20
 
-  migrate:
-    build: ./services/users_service
-    container_name: migrate_job
-    env_file:
-      - .env
-    depends_on:
-      - db
-    entrypoint: ["bash", "-lc", "python manage.py migrate --noinput"]
-    restart: "no"
-
   users-service:
     build: ./services/users_service
     container_name: users_service
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/users_service:/app
     ports:
@@ -38,12 +27,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    command: python manage.py runserver 0.0.0.0:8000
 
   products-service:
     build: ./services/products_service
     container_name: products_service
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/products_service:/app
     ports:
@@ -51,12 +41,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    command: python manage.py runserver 0.0.0.0:8000
 
   orders-service:
     build: ./services/orders_service
     container_name: orders_service
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/orders_service:/app
     ports:
@@ -64,12 +55,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    command: python manage.py runserver 0.0.0.0:8000
 
   payments-service:
     build: ./services/payments_service
     container_name: payments_service
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/payments_service:/app
     ports:
@@ -77,7 +69,9 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    command: python manage.py runserver 0.0.0.0:8000
 
 volumes:
   postgres_data:
