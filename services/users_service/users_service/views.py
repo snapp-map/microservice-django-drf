@@ -1,9 +1,10 @@
-from rest_framework import viewsets
-from django.contrib.auth import get_user_model
-from .serializers import UserSerializer
+# users_service/users_service/views.py
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-User = get_user_model()
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        token['role'] = getattr(user, 'role', 'user')
+        return token
