@@ -1,5 +1,4 @@
 #!/bin/bash
-# docker-entrypoint.sh
 
 echo "Waiting for database $USERS_DB_HOST:$USERS_DB_PORT ..."
 
