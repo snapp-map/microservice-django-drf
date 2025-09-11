@@ -1,18 +1,12 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+# docker-entrypoint.sh
 
-echo "ENTRYPOINT: Starting. CMD: $*"
+echo "Waiting for database $USERS_DB_HOST:$USERS_DB_PORT ..."
 
-PROJECT_DIR="/app"
-cd "$PROJECT_DIR"
-
-HOST="${DB_HOST:-db}"
-PORT="${DB_PORT:-5432}"
-echo "Waiting for database $HOST:$PORT ..."
-until nc -z $HOST $PORT; do
+while ! nc -z $USERS_DB_HOST $USERS_DB_PORT; do
   echo "Database is unavailable - sleeping"
-  sleep 2
+  sleep 3
 done
-echo "Database is up!"
 
+echo "Database is up - executing command"
 exec "$@"

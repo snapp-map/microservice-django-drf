@@ -3,8 +3,9 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get install -y \
-    netcat \
+# نصب bash و netcat
+RUN apt-get update && apt-get install -y \
+    netcat-openbsd \
     bash \
     && rm -rf /var/lib/apt/lists/*
 
