@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_filters",
     "users_service",
+    "drfـspectacular",
 ]
 
 MIDDLEWARE = [
@@ -157,6 +158,10 @@ REST_FRAMEWORK = {
         "products": "2/minute",
         "orders": "4/minute",
     },
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",  # فقط JSON
+        "rest_framework.renderers.BrowsableAPIRenderer",  # فرم HTML ساده
+    ],
 }
 
 SPECTACULAR_SETTINGS = {

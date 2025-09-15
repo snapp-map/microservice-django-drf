@@ -24,3 +24,4 @@ uritemplate==4.2.0
 psycopg2-binary
 cryptography>=41.0
 requests
+drf-spectacular
