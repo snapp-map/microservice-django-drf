@@ -1,10 +1,19 @@
-# users_service/users_service/views.py
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import viewsets
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .models import User
+from .serializers import UserSerializer, MyTokenObtainPairSerializer
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['username'] = user.username
-        token['role'] = getattr(user, 'role', 'user')
-        return token
+
+# ------------------------
+# JWT Token
+# ------------------------
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+
+# ------------------------
+# CRUD API for Users
+# ------------------------
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

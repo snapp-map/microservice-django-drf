@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Order(models.Model):
     user_id = models.IntegerField()
     product_id = models.IntegerField()
@@ -8,7 +9,7 @@ class Order(models.Model):
     status = models.CharField(
         max_length=20,
         choices=[("pending", "Pending"), ("paid", "Paid"), ("canceled", "Canceled")],
-        default="pending"
+        default="pending",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
