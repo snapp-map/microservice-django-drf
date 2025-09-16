@@ -18,10 +18,11 @@ class OrderSerializer(serializers.ModelSerializer):
         product = get_product(value)
         if not product:
             raise serializers.ValidationError("Product does not exist")
-        self.product_data = product  # ذخیره اطلاعات برای مرحله بعد
+        self.product_data = product  # store product info for later
         return value
 
     def create(self, validated_data):
+        # Calculate total amount using stored product data
         product_price = float(self.product_data["price"])
         quantity = validated_data["quantity"]
         validated_data["total_amount"] = product_price * quantity

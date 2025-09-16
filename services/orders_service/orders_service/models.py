@@ -12,6 +12,7 @@ class Order(models.Model):
         default="pending",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Order #{self.id} - User {self.user_id}"
