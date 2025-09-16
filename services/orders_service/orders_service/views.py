@@ -1,37 +1,76 @@
+import requests
+from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Order
 from .serializers import OrderSerializer
-from .services.external_apis import validate_user, get_product
+
+# Base URL for Products Service API
+PRODUCTS_SERVICE_URL = "http://products-service:8002/api/products/"
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all().order_by("-created_at")
+    queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
     def create(self, request, *args, **kwargs):
-        data = request.data.copy()  # Make a copy of the request data
+        user_id = request.data.get("user_id")
+        product_id = request.data.get("product_id")
+        quantity = int(request.data.get("quantity", 1))
 
-        # Validate user exists via Users Service
-        if not validate_user(data.get("user_id")):
+        # 1. Fetch product details from Products Service
+        try:
+            product_response = requests.get(
+                f"{PRODUCTS_SERVICE_URL}{product_id}/", timeout=5
+            )
+            product_response.raise_for_status()
+        except requests.RequestException:
             return Response(
-                {"error": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Product not found or service unavailable"},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Validate product exists via Products Service
-        product = get_product(data.get("product_id"))
-        if not product:
+        product_data = product_response.json()
+
+        # 2. Validate available stock
+        if product_data["stock"] < quantity:
             return Response(
-                {"error": "Product does not exist"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Not enough stock"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Calculate total_amount automatically
-        data["total_amount"] = product["price"] * int(data.get("quantity", 1))
+        # 3. Calculate total order amount
+        total_amount = float(product_data["price"]) * quantity
 
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        # 4. Wrap order creation in a database transaction
+        try:
+            with transaction.atomic():
+                # Create the order in Orders DB
+                order = Order.objects.create(
+                    user_id=user_id,
+                    product_id=product_id,
+                    quantity=quantity,
+                    total_amount=total_amount,
+                )
+
+                # 5. Update product stock in Products Service
+                try:
+                    patch_response = requests.patch(
+                        f"{PRODUCTS_SERVICE_URL}{product_id}/",
+                        json={"stock": product_data["stock"] - quantity},
+                        timeout=5,
+                    )
+                    patch_response.raise_for_status()
+                except requests.RequestException:
+                    # If stock update fails, raise an exception to trigger rollback
+                    raise Exception("Failed to update product stock")
+
+        except Exception as e:
+            # Transaction is rolled back automatically if an exception is raised
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # 6. Return the created order if everything succeeded
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
