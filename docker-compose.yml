@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   # --- DATABASES ---
   users-db:
@@ -147,6 +149,8 @@ services:
     depends_on:
       payments-db:
         condition: service_healthy
+      orders-service:
+        condition: service_started
 
   admin-service:
     build: ./services/admin_service
