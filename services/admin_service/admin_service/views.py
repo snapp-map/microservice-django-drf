@@ -23,9 +23,8 @@ class AdminUsersView(APIView):
 
     def get(self, request):
         try:
-            data = fetch_users()
-            serializer = UserSerializer(data, many=True)
-            serializer.is_valid(raise_exception=True)
+            results = fetch_users()  # لیست دیکشنری
+            serializer = UserSerializer(results, many=True)  # بدون data=
             return Response(serializer.data)
         except Exception as e:
             return Response(
@@ -41,9 +40,8 @@ class AdminProductsView(APIView):
 
     def get(self, request):
         try:
-            data = fetch_products()
-            serializer = ProductSerializer(data, many=True)
-            serializer.is_valid(raise_exception=True)
+            results = fetch_products()
+            serializer = ProductSerializer(results, many=True)  # بدون data=
             return Response(serializer.data)
         except Exception as e:
             return Response(
@@ -59,9 +57,8 @@ class AdminOrdersView(APIView):
 
     def get(self, request):
         try:
-            data = fetch_orders()
-            serializer = OrderSerializer(data, many=True)
-            serializer.is_valid(raise_exception=True)
+            results = fetch_orders()
+            serializer = OrderSerializer(results, many=True)  # بدون data=
             return Response(serializer.data)
         except Exception as e:
             return Response(
@@ -77,15 +74,8 @@ class AdminPaymentsView(APIView):
 
     def get(self, request):
         try:
-            # Fetch payments from payments-service
-            results = fetch_payments()  # should always return a list
-            if not isinstance(results, list):
-                # Safety fallback
-                results = []
-
-            # Correctly pass data= to serializer
-            serializer = PaymentSerializer(data=results, many=True)
-            serializer.is_valid(raise_exception=True)  # validate data
+            results = fetch_payments()  # باید همیشه لیست برگرداند
+            serializer = PaymentSerializer(results, many=True)  # بدون data=
             return Response(serializer.data)
         except Exception as e:
             return Response(

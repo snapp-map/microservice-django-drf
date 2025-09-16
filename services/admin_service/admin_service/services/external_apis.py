@@ -3,63 +3,78 @@ from django.conf import settings
 
 
 # ==========================
-# Fetch Users from users-service
+# Fetch Users
 # ==========================
 def fetch_users():
-    """Fetch all users from the users-service API."""
+    """Fetch all users from users-service API."""
     try:
-        response = requests.get(f"{settings.USERS_SERVICE_URL}/api/users/", timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        return data.get("results", [])
+        url = f"{settings.USERS_SERVICE_URL}/api/users/"
+        resp = requests.get(url, timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        # Always return a list
+        if isinstance(data, dict) and "results" in data:
+            return data["results"]
+        elif isinstance(data, list):
+            return data
+        return []
     except requests.RequestException:
         return []
 
 
 # ==========================
-# Fetch Products from products-service
+# Fetch Products
 # ==========================
 def fetch_products():
-    """Fetch all products from products-service."""
+    """Fetch all products from products-service API."""
     try:
-        response = requests.get(
-            f"{settings.PRODUCTS_SERVICE_URL}/api/products/", timeout=5
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data.get("results", [])
+        url = f"{settings.PRODUCTS_SERVICE_URL}/api/products/"
+        resp = requests.get(url, timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        if isinstance(data, dict) and "results" in data:
+            return data["results"]
+        elif isinstance(data, list):
+            return data
+        return []
     except requests.RequestException:
         return []
 
 
 # ==========================
-# Fetch Orders from orders-service
+# Fetch Orders
 # ==========================
 def fetch_orders():
-    """Fetch all orders from orders-service."""
+    """Fetch all orders from orders-service API."""
     try:
-        response = requests.get(f"{settings.ORDERS_SERVICE_URL}/api/orders/", timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        return data.get("results", [])
+        url = f"{settings.ORDERS_SERVICE_URL}/api/orders/"
+        resp = requests.get(url, timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        if isinstance(data, dict) and "results" in data:
+            return data["results"]
+        elif isinstance(data, list):
+            return data
+        return []
     except requests.RequestException:
         return []
 
 
 # ==========================
-# Fetch Payments from payments-service
+# Fetch Payments
 # ==========================
 def fetch_payments():
     """Fetch all payments from payments-service."""
     try:
-        response = requests.get(
-            f"{settings.PAYMENTS_SERVICE_URL}/api/payments/", timeout=5
-        )
-        response.raise_for_status()
-        data = response.json()
-        # Normalize to list
-        if isinstance(data, list):
+        url = f"{settings.PAYMENTS_SERVICE_URL}/api/payments/"
+        resp = requests.get(url, timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        # Payments-service returns {"count": ..., "results": [...]}
+        if isinstance(data, dict) and "results" in data:
+            return data["results"]
+        elif isinstance(data, list):
             return data
-        return data.get("results", [])
+        return []
     except requests.RequestException:
         return []
